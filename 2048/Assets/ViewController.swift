@@ -9,12 +9,20 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+       
     }
 
+    @IBAction func startGameButtonTapped(sender:UIButton){
+        let game = GameViewController(dimension:8,threshold:2048)
+        self.presentedViewController(game,animated:true, completion: nil))
+        
+        
+    }
 
 }
 
