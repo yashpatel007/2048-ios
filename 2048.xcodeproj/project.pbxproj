@@ -110,9 +110,9 @@
 			children = (
 				CC0DF3782209EEAF006B0E0C /* Game */,
 				CC0DF3762209EE52006B0E0C /* Views */,
+				CC0DF3672209EAFA006B0E0C /* Assets */,
 				CC0DF3772209EE8E006B0E0C /* Models */,
 				CCE9BB592205DC900065535A /* Info.plist */,
-				CC0DF3672209EAFA006B0E0C /* Assets */,
 			);
 			path = 2048;
 			sourceTree = "<group>";
