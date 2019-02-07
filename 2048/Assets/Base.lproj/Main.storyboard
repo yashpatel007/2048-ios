@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jmP-TD-UmJ">
-                                <rect key="frame" x="114" y="144" width="131" height="69"/>
+                                <rect key="frame" x="122" y="144" width="131" height="69"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="1" green="0.69524216320088428" blue="0.10625832310351346" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <state key="normal" title="START">
@@ -30,7 +30,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C9F-ty-UMl">
-                                <rect key="frame" x="114" y="247" width="131" height="69"/>
+                                <rect key="frame" x="122" y="244" width="131" height="69"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="1" green="0.69524216319999999" blue="0.1062583231" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <state key="normal" title="High score">
@@ -38,7 +38,7 @@
                                 </state>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="42S-qY-pFO">
-                                <rect key="frame" x="114" y="349" width="131" height="69"/>
+                                <rect key="frame" x="122" y="348" width="131" height="69"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="1" green="0.69524216319999999" blue="0.1062583231" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <state key="normal" title="ABOUT">
