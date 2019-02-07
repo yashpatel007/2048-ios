@@ -40,7 +40,7 @@ class GameModel:NSObject{
         self.delegate = delegate
         queue = [MoveCommand]()
         timer = Timer()
-        gameboard = SquareGameboard(dimention : d, initialValue: .Empty)
+        gameboard = SquareGameboard(dimension : d, initialValue: .empty)
         
         super.init()
         
@@ -49,12 +49,12 @@ class GameModel:NSObject{
     
     func reset(){
         score = 0
-        gameboard.setAll(.Empty)
-        queue.removeAll(keepCapacity : true)
+        gameboard.setAll(to: .empty)
+        queue.removeAll(keepingCapacity : true)
         timer.invalidate()
     }
     
-    func queueMove(direction : MoveDirection, completion: (Bool)->()){
+    func queueMove(direction : MoveDirection, completion: @escaping (Bool)->()){
         
         if queue.count > maxCommands{
             return
@@ -62,44 +62,43 @@ class GameModel:NSObject{
         let  command = MoveCommand(d: direction, c: completion)
         queue.append(command)
         if(!timer.isValid){
-            timerFired(timer: timer)
+            timerFired(timer)
         }
     }
     
-    func timerFired(timer: Timer){
-        if queue.count == 0{
+    @objc func timerFired(_: Timer) {
+        if queue.count == 0 {
             return
         }
-        
+        // Go through the queue until a valid command is run or the queue is empty
         var changed = false
-        while queue.count > 0{
+        while queue.count > 0 {
             let command = queue[0]
-            queue.removeAtIndex(0)
+            queue.remove(at: 0)
             changed = performMove(direction: command.direction)
             command.completion(changed)
             if changed {
+                // If the command doesn't change anything, we immediately run the next one
                 break
             }
         }
         if changed {
-            self.timer = Timer.scheduledTimer(timeInterval: queueDelay,
-                                              target: self,
-                                              selector:Selector("timerFired:"),
-                                              userInfo: nil,
-                                              repeats: false)
-            
+            timer = Timer.scheduledTimer(timeInterval: queueDelay,
+                                         target: self,
+                                         selector:
+                #selector(GameModel.timerFired(_:)),
+                                         userInfo: nil,
+                                         repeats: false)
         }
-        
-        
     }
     
     func insertTile(pos: (Int,Int), value :Int){
         let (x,y) = pos
         switch gameboard[x,y]{
-        case .Empty:
-            gameboard[x,y] = TileObject.Tile(value)
+        case .empty:
+            gameboard[x,y] = TileObject.tile(value)
             delegate.insertTile(location: pos , value: value)
-        case .Tile:
+        case .tile:
             break
             
         }
@@ -122,9 +121,9 @@ class GameModel:NSObject{
         for i in 0..<dimension {
             for j in 0..<dimension {
                 switch gameboard[i,j]{
-                case .Empty:
+                case .empty:
                     buffer += [(i,j)]
-                case .Tile:
+                case .tile:
                     break
                 }
             }
@@ -136,41 +135,44 @@ class GameModel:NSObject{
         return gameboardEmptySpots().count == 0
     }
     
-    func titleBelowHasSameValue(loc :(Int, Int),_value:Int) ->Bool{
-        let (x,y) = loc
-        if y==dimension-1{return false}
-        switch gameboard[x,y+1]{
-        case let .Tile(v):
-            return v == value
-        default:
+    func tileBelowHasSameValue(location: (Int, Int), value: Int) -> Bool {
+        let (x, y) = location
+        guard y != dimension - 1 else {
             return false
         }
+        if case let .tile(v) = gameboard[x, y+1] {
+            return v == value
+        }
+        return false
     }
     
-    func tileToRightHasSameValue(loc: (Int, Int),_value :Int) -> Bool{
-        let (x,y) = loc
-        if (x == dimension-1){
+    func tileToRightHasSameValue(location: (Int, Int), value: Int) -> Bool {
+        let (x, y) = location
+        guard x != dimension - 1 else {
             return false
         }
-        switch gameboard[x+1,y]{
-        case let .Tile(v):
+        if case let .tile(v) = gameboard[x+1, y] {
             return v == value
-        default:
-            return false
         }
+        return false
     }
     
-    func userHasLost()->Bool{
-        if !gameboardFull(){
+    func userHasLost() -> Bool {
+        guard gameboardEmptySpots().isEmpty else {
+            // Player can't lose before filling up the board
             return false
         }
-        for i in 0..<dimension{
-            for j in 0..<dimension{
-                switch gameboard[i,j]{
-                case .Empty:
-                    assert(false, "Gameboard reported itself as full, but we still found an empty tile. This logic error.")
-                case let .Tile(v):
-                    if self.titleBelowHasSameValue(loc: (i,j), _value: v) || self.tileToRightHasSameValue(loc: (i,j), _value: v){
+        
+        // Run through all the tiles and check for possible moves
+        for i in 0..<dimension {
+            for j in 0..<dimension {
+                switch gameboard[i, j] {
+                case .empty:
+                    assert(false, "Gameboard reported itself as full, but we still found an empty tile. This is a logic error.")
+                case let .tile(v):
+                    if tileBelowHasSameValue(location: (i, j), value: v) ||
+                        tileToRightHasSameValue(location: (i, j), value: v)
+                    {
                         return false
                     }
                 }
@@ -183,7 +185,7 @@ class GameModel:NSObject{
         for i in 0..<dimension{
             for j in 0..<dimension{
                 switch gameboard[i,j]{
-                case let .Tile(v) where v >= threshold:
+                case let .tile(v) where v >= threshold:
                     return (true,(i,j))
                 default:
                     continue
@@ -194,19 +196,19 @@ class GameModel:NSObject{
         return (false,nil)
         }
     
-    func performMove(direction:MoveDirection)->Bool{
-        let coordinateGenerator: (Int)->[(Int,Int)] = { (iteration :Int)->[(Int,Int)] in
-            var buffer = Array<Int, Int>(count:self.dimention,repeatedValue: (0,0))
-            for i in 0..<self.dimension{
+    func performMove(direction: MoveDirection) -> Bool {
+        let coordinateGenerator: (Int) -> [(Int, Int)] = { (iteration: Int) -> [(Int, Int)] in
+            var buffer = Array<(Int, Int)>(repeating: (0, 0), count: self.dimension)
+            for i in 0..<self.dimension {
                 switch direction {
-                case .UP: buffer[i] = (i,iteration)
-                case .Down: buffer[i] = (self.dimention-i-1,iteration)
-                case .Left:buffer[i] = (iteration,i)
-                case .Right:buffer[i] = (iteration,self.dimention-i-1)
+                case .up: buffer[i] = (i, iteration)
+                case .down: buffer[i] = (self.dimension - i - 1, iteration)
+                case .left: buffer[i] = (iteration, i)
+                case .right: buffer[i] = (iteration, self.dimension - i - 1)
                 }
             }
             return buffer
-            }
+        }
         
         var atLeastOneMove = false
         for i in 0..<dimension{
@@ -216,30 +218,30 @@ class GameModel:NSObject{
                 let (x,y) = c
                 return self.gameboard[x,y]
                 }
-            let orders = merge(tiles)
+            let orders = merge(group: tiles)
             atLeastOneMove = orders.count > 0 ? true :  atLeastOneMove
             
             for object in orders{
                 switch object{
-                case let MoveOrder.SingleMoveOrder(s,d,v,wasMerge):
+                case let MoveOrder.singleMoveOrder(s,d,v,wasMerge):
                     let (sx, sy) = coords[s]
                     let (dx,dy) = coords[d]
                     if wasMerge {
                         score += v
-                        gameboard[sx,sy] = TileObject.Empty
-                        gameboard[dx,dy] = TileObject.Tile(v)
-                        deligate.moveOneTile(coords[s], to: coords[d], value :v)
+                        gameboard[sx,sy] = TileObject.empty
+                        gameboard[dx,dy] = TileObject.tile(v)
+                        delegate.moveOneTile(from: coords[s], to: coords[d], value :v)
                         
                     }
                
-                case let MoveOrder.DoubleMoveOrder(s1,s2,d,v):
+                case let MoveOrder.doubleMoveOrder(s1,s2,d,v):
                         let (s1x, s1y) = coords[s1]
                         let (s2x, s2y) = coords[s2]
                         let (dx, dy) = coords[d]
                         score += v
-                        gameboard[s1x,s1y] = TileObject.Empty
-                        gameboard[s2x,s2y] = TileObject.Empty
-                        gameboard [dx,dy] = TileObject.Tile(V)
+                        gameboard[s1x,s1y] = TileObject.empty
+                        gameboard[s2x,s2y] = TileObject.empty
+                        gameboard [dx,dy] = TileObject.tile(v)
                         delegate.moveTwoTile(from: ((coords[s1],coords[s2])), to: coords[d], value: v)
                         }
             }
@@ -256,9 +258,9 @@ class GameModel:NSObject{
         for (idx, tile) in group.enumerated() {
             // Go through all the tiles in 'group'. When we see a tile 'out of place', create a corresponding ActionToken.
             switch tile {
-            case let .Tile(value) where tokenBuffer.count == idx:
+            case let .tile(value) where tokenBuffer.count == idx:
                 tokenBuffer.append(ActionToken.noAction(source: idx, value: value))
-            case let .Tile(value):
+            case let .tile(value):
                 tokenBuffer.append(ActionToken.move(source: idx, value: value))
             default:
                 break
@@ -330,7 +332,7 @@ class GameModel:NSObject{
     }
     
     func merge(group: [TileObject]) -> [MoveOrder] {
-        return convert(collapse(condense(group)))
+        return convert(group: collapse(group: condense(group: group)))
     }
     
     

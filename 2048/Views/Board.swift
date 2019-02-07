@@ -15,7 +15,7 @@ class Board : UIView {
     var cornerRadius: CGFloat
     var tiles: Dictionary<NSIndexPath, Tile>
     
-    let provider = Appearance()
+    let provider = AppearanceProvider()
     
     let tilePopStartScale: CGFloat = 0.1
     let tilePopMaxScale: CGFloat = 1.1
@@ -46,7 +46,7 @@ class Board : UIView {
         fatalError("NSCoding not supported")
     }
     func reset() {
-        for (key, tile) in tiles {
+        for (_, tile) in tiles {
             tile.removeFromSuperview()
         }
         tiles.removeAll(keepingCapacity: true)
@@ -77,22 +77,23 @@ class Board : UIView {
     }
     
     /// Update the gameboard by inserting a tile in a given location. The tile will be inserted with a 'pop' animation.
-    func insertTile(pos: (Int, Int), value: Int) {
-        assert(positionIsValid(pos))
+    func insertTile(at pos: (Int, Int), value: Int) {
+        assert(positionIsValid(pos: pos))
         let (row, col) = pos
         let x = tilePadding + CGFloat(col)*(tileWidth + tilePadding)
         let y = tilePadding + CGFloat(row)*(tileWidth + tilePadding)
         let r = (cornerRadius >= 2) ? cornerRadius - 2 : 0
-        let tile = Tile(position: CGPointMake(x,y), width: tileWidth, value: value, radius: r, delegate: provider)
+        let tile = Tile(position: CGPoint(x: x, y: y), width: tileWidth, value: value, radius: r, delegate: provider)
         tile.layer.setAffineTransform(CGAffineTransform(scaleX: tilePopStartScale, y: tilePopStartScale))
         
         addSubview(tile)
-        bringSubview(toFront: tile)
+        bringSubviewToFront(tile)
         tiles[NSIndexPath(row: row, section: col)] = tile
         
         // Add to board
-        UIView.animate(withDuration: tileExpandTime, delay: tilePopDelay, options: UIView.AnimationOptions().TransitionNone,
+        UIView.animate(withDuration: tileExpandTime, delay: tilePopDelay, options: UIView.AnimationOptions(),
                        animations: {
+                        // Make the tile 'pop'
                         tile.layer.setAffineTransform(CGAffineTransform(scaleX: self.tilePopMaxScale, y: self.tilePopMaxScale))
         },
                        completion: { finished in
@@ -106,7 +107,7 @@ class Board : UIView {
     /// Update the gameboard by moving a single tile from one location to another. If the move is going to collapse two
     /// tiles into a new tile, the tile will 'pop' after moving to its new location.
     func moveOneTile(from: (Int, Int), to: (Int, Int), value: Int) {
-        assert(positionIsValid(from) && positionIsValid(to))
+        assert(positionIsValid(pos: from) && positionIsValid(pos: to))
         let (fromRow, fromCol) = from
         let (toRow, toCol) = to
         let fromKey = NSIndexPath(row: fromRow, section: fromCol)
@@ -161,7 +162,7 @@ class Board : UIView {
     }
     
     func moveTwoTiles(from: ((Int, Int), (Int, Int)), to: (Int, Int), value: Int) {
-        assert(positionIsValid(from.0) && positionIsValid(from.1) && positionIsValid(to))
+        assert(positionIsValid(pos: from.0) && positionIsValid(pos: from.1) && positionIsValid(pos: to))
         let (fromRowA, fromColA) = from.0
         let (fromRowB, fromColB) = from.1
         let (toRow, toCol) = to

@@ -17,9 +17,10 @@ class ViewController: UIViewController {
        
     }
 
-    @IBAction func startGameButtonTapped(sender:UIButton){
+
+    @IBAction func startGameButtonTapped(_ sender : UIButton){
         let game = GameViewController(dimention: 4, threshold: 2048)
-        self.presentedViewController(game,animated:true, completion: nil))
+        self.present(game, animated: true, completion: nil)
     }
     
     
