@@ -29,7 +29,7 @@ class GameViewController : UIViewController, GameModelProtocol {
         dimention = d > 2 ? d : 2
         threshold = t > 8 ? t : 8
         super.init(nibName: nil, bundle: nil)
-        model = GameModel(dimention: dimention, threshold: threshold, delegate: self)
+        model = GameModel(dimension: dimention, threshold: threshold, delegate: self)
         view.backgroundColor = UIColor(red:131.0/255.0, green: 3.0/255.0, blue: 0.0/255.0, alpha: 1.0)
         setupSwipeControls()
     }
@@ -111,7 +111,7 @@ class GameViewController : UIViewController, GameModelProtocol {
         let padding: CGFloat = dimention > 5 ? thinPadding : thickPadding
         let v1 = boardWidth - padding*(CGFloat(dimention + 1))
         let width: CGFloat = CGFloat(floorf(CFloat(v1)))/CGFloat(dimention)//look at B of Board over here
-        let gameboard = board(dimension: dimention,
+        let gameboard = Board(dimension: dimention,
                                       tileWidth: width,
                                       tilePadding: padding,
                                       cornerRadius: 6,
@@ -230,7 +230,7 @@ class GameViewController : UIViewController, GameModelProtocol {
             return
         }
         let s = scoreView!
-        s.scoreChanged(to: score)
+        s.scoreChanged(newScore: score)
     }
     
     func moveOneTile(from: (Int, Int), to: (Int, Int), value: Int) {

@@ -9,7 +9,7 @@
 import UIKit
 
 /// A view representing a single swift-2048 tile.
-class TileView : UIView {
+class Tile : UIView {
     var value : Int = 0 {
         didSet {
             backgroundColor = delegate.tileColor(value)

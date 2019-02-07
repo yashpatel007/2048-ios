@@ -17,13 +17,13 @@ protocol GameModelProtocol :class {
 
 class GameModel:NSObject{
     
-    let dimention:Int
+    let dimension:Int
     let threshold:Int
     
     var score: Int = 0
     {
         didSet{
-            delegate.scoreChanged(score)
+            delegate.scoreChange(score: score)
         }
     }
     var gameboard: SquareGameboard<TileObject>
@@ -34,8 +34,8 @@ class GameModel:NSObject{
     
     let maxCommands=100
     let queueDelay=0.3
-    init(dimention d: Int, threshold : t, delegate: GameModelProtocol) {
-        dimention = d
+    init(dimention d: Int, threshold t: Int, delegate: GameModelProtocol) {
+        dimension = d
         threshold = t
         self.delegate = delegate
         queue = [MoveCommand]()
@@ -61,8 +61,8 @@ class GameModel:NSObject{
         }
         let  command = MoveCommand(d: direction, c: completion)
         queue.append(command)
-        if(!timer.valid){
-            timerFired(timer)
+        if(!timer.isValid){
+            timerFired(timer: timer)
         }
     }
     
@@ -111,7 +111,7 @@ class GameModel:NSObject{
         if openSpots.count == 0{
             return
         }
-        let idx = Int(arc4random_uniform(UInt32(openSpots.count -1)))
+        let idx = Int(arc4random_uniform(UInt32(openSpots.count-1)))
         let (x,y)=openSpots[idx]
         insertTile(pos: (x,y), value: value)
     }
@@ -119,8 +119,8 @@ class GameModel:NSObject{
     func gameboardEmptySpots()->[(Int,Int)]{
         
         var buffer = Array<(Int,Int)>()
-        for i in 0..<dimention {
-            for j in 0..<dimention {
+        for i in 0..<dimension {
+            for j in 0..<dimension {
                 switch gameboard[i,j]{
                 case .Empty:
                     buffer += [(i,j)]
@@ -138,7 +138,7 @@ class GameModel:NSObject{
     
     func titleBelowHasSameValue(loc :(Int, Int),_value:Int) ->Bool{
         let (x,y) = loc
-        if y==dimention-1{return false}
+        if y==dimension-1{return false}
         switch gameboard[x,y+1]{
         case let .Tile(v):
             return v == value
@@ -149,7 +149,7 @@ class GameModel:NSObject{
     
     func tileToRightHasSameValue(loc: (Int, Int),_value :Int) -> Bool{
         let (x,y) = loc
-        if (x == dimention-1){
+        if (x == dimension-1){
             return false
         }
         switch gameboard[x+1,y]{
@@ -164,8 +164,8 @@ class GameModel:NSObject{
         if !gameboardFull(){
             return false
         }
-        for i in 0..<dimention{
-            for j in 0..<dimention{
+        for i in 0..<dimension{
+            for j in 0..<dimension{
                 switch gameboard[i,j]{
                 case .Empty:
                     assert(false, "Gameboard reported itself as full, but we still found an empty tile. This logic error.")
@@ -180,8 +180,8 @@ class GameModel:NSObject{
     }
     
     func userHasWon()->(Bool, (Int,Int)?){
-        for i in 0..<dimention{
-            for j in 0..<dimention{
+        for i in 0..<dimension{
+            for j in 0..<dimension{
                 switch gameboard[i,j]{
                 case let .Tile(v) where v >= threshold:
                     return (true,(i,j))
@@ -197,7 +197,7 @@ class GameModel:NSObject{
     func performMove(direction:MoveDirection)->Bool{
         let coordinateGenerator: (Int)->[(Int,Int)] = { (iteration :Int)->[(Int,Int)] in
             var buffer = Array<Int, Int>(count:self.dimention,repeatedValue: (0,0))
-            for i in 0..<self.dimention{
+            for i in 0..<self.dimension{
                 switch direction {
                 case .UP: buffer[i] = (i,iteration)
                 case .Down: buffer[i] = (self.dimention-i-1,iteration)
@@ -209,8 +209,8 @@ class GameModel:NSObject{
             }
         
         var atLeastOneMove = false
-        for i in 0..<dimention{
-            let coords =coordinateGenerator(i)
+        for i in 0..<dimension{
+            let coords = coordinateGenerator(i)
             
             let tiles = coords.map() { (c: (Int,Int)) -> TileObject in
                 let (x,y) = c

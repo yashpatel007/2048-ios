@@ -19,6 +19,7 @@ class ScoreView : UIView, ScoreViewProtocol{
             
         }
     }
+    
     let defaultFrame = CGRect(x: 0,y: 0,width: 140,height: 140)
     var label :UILabel
     
@@ -37,8 +38,12 @@ class ScoreView : UIView, ScoreViewProtocol{
     }
     
     func scoreChanged(newScore s: Int) {
-        let defaultFrame = CGRect(x: 0, y: 0, width: 140, height: 140)
+        score = s
     }
     
+    class ControlView {
+        let defaultFrame = CGRect(x: 0, y: 0, width: 140, height: 40)
+        
+    }
     
 }
